@@ -12,7 +12,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { CourseInfo } from "../types";
+import { CourseInfo, Lesson } from "../types";
 import Header from "../components/Header";
 import { useParams } from "react-router-dom";
 import YouTube from "react-youtube";
@@ -37,11 +37,10 @@ function App() {
   }, []);
 
   function removeNonPrintableCharacters(str: string) {
-    return str.replace(/[^\x20-\x7E]/g, "");
+    return str.replaceAll("\n", "<br />").replace(/[^\x20-\x7E]/g, "");
   }
 
   const isMobile = useMediaQuery("(max-width:600px)");
-
   return (
     <>
       <Header />
@@ -51,8 +50,9 @@ function App() {
         {!loading &&
           course &&
           (() => {
-            const lessons = [
+            const lessons: Lesson[] = [
               {
+                id: 0,
                 name: "Course Introduction",
                 description: removeNonPrintableCharacters(course.abstract),
                 videoId: course.introVideoId,
@@ -80,6 +80,15 @@ function App() {
                   />
                   <Typography variant="body2">{course.institute}</Typography>
                 </Box>
+                {course.syllabus && (
+                  <Button
+                    variant="outlined"
+                    href={course.syllabus}
+                    target="_blank"
+                  >
+                    Syllabus
+                  </Button>
+                )}
                 <Box
                   display="flex"
                   gap={2}
@@ -88,14 +97,25 @@ function App() {
                   flexDirection={isMobile ? "column" : "row"}
                 >
                   <Box width={"100%"} height={isMobile ? "300px" : "100%"}>
-                    <YouTube
-                      videoId={lessons[lessonId].videoId}
-                      opts={{
-                        width: "100%",
-                        height: "100%",
-                      }}
-                      style={{ width: "100%", height: "100%" }}
-                    />
+                    {lessons[lessonId].videoId ? (
+                      <YouTube
+                        videoId={lessons[lessonId].videoId}
+                        opts={{
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        style={{ width: "100%", height: "100%" }}
+                      />
+                    ) : lessons[lessonId].lectureLink ? (
+                      <iframe
+                        src={lessons[lessonId].lectureLink}
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    ) : null}
                   </Box>
                   <Box
                     display={"flex"}

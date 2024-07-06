@@ -78,6 +78,7 @@ export interface Chapter {
 export interface Lesson {
   id: number;
   name: string;
-  videoId: string;
+  videoId?: string;
+  lectureLink?: string;
   description?: any;
 }
