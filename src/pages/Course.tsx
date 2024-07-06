@@ -5,8 +5,12 @@ import {
   Button,
   CircularProgress,
   Container,
-  Divider,
+  List,
+  ListItemButton,
+  ListItemText,
+  ListSubheader,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { CourseInfo } from "../types";
 import Header from "../components/Header";
@@ -36,6 +40,8 @@ function App() {
     return str.replace(/[^\x20-\x7E]/g, "");
   }
 
+  const isMobile = useMediaQuery("(max-width:600px)");
+
   return (
     <>
       <Header />
@@ -47,19 +53,18 @@ function App() {
           (() => {
             const lessons = [
               {
-                title: "Course Introduction",
+                name: "Course Introduction",
                 description: removeNonPrintableCharacters(course.abstract),
                 videoId: course.introVideoId,
               },
-              ...course.chapters
-                .map((chapter) =>
-                  chapter.lessons.map((lesson) => ({
-                    title: lesson.name,
-                    description: lesson.description,
-                    videoId: lesson.videoId,
-                  }))
-                )
-                .flat(),
+              ...course.chapters.map((chapter) => chapter.lessons).flat(),
+            ];
+            const weeks = [
+              { title: "Introduction", lessons: [lessons[0]] },
+              ...course.chapters.map((chapter) => ({
+                title: chapter.name,
+                lessons: chapter.lessons,
+              })),
             ];
             return (
               <Box>
@@ -75,17 +80,68 @@ function App() {
                   />
                   <Typography variant="body2">{course.institute}</Typography>
                 </Box>
-                <Box display="flex" gap={2} my={2}>
-                  <YouTube videoId={lessons[lessonId].videoId} />
-                  <Box sx={{ width: "100%" }}>
-                    <Typography variant="h5">
-                      {lessons[lessonId].title}
-                    </Typography>
-                    <Typography variant="body1">
-                      {lessons[lessonId].description}
-                    </Typography>
-
-                    <Box display="flex" gap={2} my={2} width="100%">
+                <Box
+                  display="flex"
+                  gap={2}
+                  my={2}
+                  height={isMobile ? undefined : "480px"}
+                  flexDirection={isMobile ? "column" : "row"}
+                >
+                  <Box width={"100%"} height={isMobile ? "300px" : "100%"}>
+                    <YouTube
+                      videoId={lessons[lessonId].videoId}
+                      opts={{
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      style={{ width: "100%", height: "100%" }}
+                    />
+                  </Box>
+                  <Box
+                    display={"flex"}
+                    flexDirection={"column"}
+                    gap={2}
+                    width={"100%"}
+                    height={"100%"}
+                  >
+                    <Box
+                      gap={2}
+                      my={2}
+                      width="100%"
+                      overflow={"auto"}
+                      height={isMobile ? "400px" : "100%"}
+                    >
+                      <List dense>
+                        {weeks.map((week) => (
+                          <>
+                            <ListSubheader
+                              disableSticky
+                              sx={{
+                                backgroundColor: "#333",
+                              }}
+                            >
+                              {week.title.toUpperCase()}
+                            </ListSubheader>
+                            {week.lessons.map((lesson) => (
+                              // <ListItem key={lessons.indexOf(lesson)}>
+                              <ListItemButton
+                                key={lesson.name}
+                                selected={
+                                  lesson.name === lessons[lessonId].name
+                                }
+                                onClick={() =>
+                                  setLessonId(lessons.indexOf(lesson))
+                                }
+                              >
+                                <ListItemText primary={lesson.name} />
+                              </ListItemButton>
+                              // </ListItem>
+                            ))}
+                          </>
+                        ))}
+                      </List>
+                    </Box>
+                    <Box display="flex" gap={2} width="100%">
                       <Button
                         sx={{ width: "100%" }}
                         variant="outlined"
@@ -107,11 +163,24 @@ function App() {
                         Next
                       </Button>
                     </Box>
-                  </Box>{" "}
+                  </Box>
                   {/* right info */}
-                </Box>{" "}
+                </Box>
                 {/* yt area */}
-                <Typography variant="h5">Assignments</Typography>
+
+                <Box sx={{ width: "100%" }} my={2}>
+                  <Typography variant="h5">{lessons[lessonId].name}</Typography>
+                  <Typography
+                    variant="body1"
+                    dangerouslySetInnerHTML={{
+                      __html: lessons[lessonId].description,
+                    }}
+                  />
+                </Box>
+
+                {/* <Typography variant="h5" sx={{ marginTop: "20px" }}>
+                  Assignments
+                </Typography>
                 {course.downloadables.assignments.map((assignment) => (
                   <Box key={assignment.title} display={"flex"} gap={2}>
                     <Typography variant="body1">{assignment.title}</Typography>
@@ -124,7 +193,7 @@ function App() {
                     </Button>
                     <Divider />
                   </Box>
-                ))}
+                ))} */}
               </Box>
             );
           })()}
