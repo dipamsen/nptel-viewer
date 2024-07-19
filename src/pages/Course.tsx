@@ -5,10 +5,12 @@ import {
   Button,
   CircularProgress,
   Container,
+  FormControlLabel,
   List,
   ListItemButton,
   ListItemText,
   ListSubheader,
+  Switch,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -21,6 +23,7 @@ function App() {
   const [course, setCourse] = useState<CourseInfo>();
   const [loading, setLoading] = useState(false);
   const [lessonId, setLessonId] = useState<number>(0);
+  const [expandVideo, setExpandVideo] = useState(false);
   const { id } = useParams<{
     id: string;
   }>();
@@ -85,15 +88,29 @@ function App() {
                     variant="outlined"
                     href={course.syllabus}
                     target="_blank"
+                    sx={{ marginRight: "10px" }}
                   >
                     Syllabus
                   </Button>
+                )}
+                {!isMobile && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={expandVideo}
+                        onChange={() => setExpandVideo(!expandVideo)}
+                      />
+                    }
+                    label="Expand Video"
+                  />
                 )}
                 <Box
                   display="flex"
                   gap={2}
                   my={2}
-                  height={isMobile ? undefined : "480px"}
+                  height={
+                    isMobile ? undefined : expandVideo ? "600px" : "480px"
+                  }
                   flexDirection={isMobile ? "column" : "row"}
                 >
                   <Box width={"100%"} height={isMobile ? "300px" : "100%"}>
@@ -117,73 +134,75 @@ function App() {
                       />
                     ) : null}
                   </Box>
-                  <Box
-                    display={"flex"}
-                    flexDirection={"column"}
-                    gap={2}
-                    width={"100%"}
-                    height={"100%"}
-                  >
+                  {!expandVideo && (
                     <Box
+                      display={"flex"}
+                      flexDirection={"column"}
                       gap={2}
-                      my={2}
-                      width="100%"
-                      overflow={"auto"}
-                      height={isMobile ? "400px" : "100%"}
+                      width={"100%"}
+                      height={"100%"}
                     >
-                      <List dense>
-                        {weeks.map((week) => (
-                          <>
-                            <ListSubheader
-                              disableSticky
-                              sx={{
-                                backgroundColor: "#333",
-                              }}
-                            >
-                              {week.title.toUpperCase()}
-                            </ListSubheader>
-                            {week.lessons.map((lesson) => (
-                              // <ListItem key={lessons.indexOf(lesson)}>
-                              <ListItemButton
-                                key={lesson.name}
-                                selected={
-                                  lesson.name === lessons[lessonId].name
-                                }
-                                onClick={() =>
-                                  setLessonId(lessons.indexOf(lesson))
-                                }
+                      <Box
+                        gap={2}
+                        my={2}
+                        width="100%"
+                        overflow={"auto"}
+                        height={isMobile ? "400px" : "100%"}
+                      >
+                        <List dense>
+                          {weeks.map((week) => (
+                            <>
+                              <ListSubheader
+                                disableSticky
+                                sx={{
+                                  backgroundColor: "#333",
+                                }}
                               >
-                                <ListItemText primary={lesson.name} />
-                              </ListItemButton>
-                              // </ListItem>
-                            ))}
-                          </>
-                        ))}
-                      </List>
+                                {week.title.toUpperCase()}
+                              </ListSubheader>
+                              {week.lessons.map((lesson) => (
+                                // <ListItem key={lessons.indexOf(lesson)}>
+                                <ListItemButton
+                                  key={lesson.name}
+                                  selected={
+                                    lesson.name === lessons[lessonId].name
+                                  }
+                                  onClick={() =>
+                                    setLessonId(lessons.indexOf(lesson))
+                                  }
+                                >
+                                  <ListItemText primary={lesson.name} />
+                                </ListItemButton>
+                                // </ListItem>
+                              ))}
+                            </>
+                          ))}
+                        </List>
+                      </Box>
+                      <Box display="flex" gap={2} width="100%">
+                        <Button
+                          sx={{ width: "100%" }}
+                          variant="outlined"
+                          onClick={() =>
+                            setLessonId((lessonId - 1) % lessons.length)
+                          }
+                          disabled={lessonId === 0}
+                        >
+                          Previous
+                        </Button>
+                        <Button
+                          sx={{ width: "100%" }}
+                          variant="outlined"
+                          onClick={() =>
+                            setLessonId((lessonId + 1) % lessons.length)
+                          }
+                          disabled={lessonId === lessons.length - 1}
+                        >
+                          Next
+                        </Button>
+                      </Box>
                     </Box>
-                    <Box display="flex" gap={2} width="100%">
-                      <Button
-                        sx={{ width: "100%" }}
-                        variant="outlined"
-                        onClick={() =>
-                          setLessonId((lessonId - 1) % lessons.length)
-                        }
-                        disabled={lessonId === 0}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        sx={{ width: "100%" }}
-                        variant="outlined"
-                        onClick={() =>
-                          setLessonId((lessonId + 1) % lessons.length)
-                        }
-                        disabled={lessonId === lessons.length - 1}
-                      >
-                        Next
-                      </Button>
-                    </Box>
-                  </Box>
+                  )}
                   {/* right info */}
                 </Box>
                 {/* yt area */}
