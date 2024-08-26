@@ -1,1 +1,3 @@
-# React + Vite + TS + MUI + React Router Starter
+# NPTEL Viewer
+
+Alternate client to browse NPTEL Courses and resources.
