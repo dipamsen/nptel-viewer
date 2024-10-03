@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Card,
-  CardActionArea,
-  CardContent,
   CircularProgress,
   Container,
   FormControl,
@@ -16,9 +13,9 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import Header from "./components/Header";
-import { Link } from "react-router-dom";
+import CourseCard from "./components/CourseCard";
 
-type Course = {
+export type Course = {
   id: string;
   title: string;
   institute: string;
@@ -40,6 +37,7 @@ function App() {
   const [institute, setInstitute] = useState<string[]>([]);
   const [contentType, setContentType] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+  const [favIDs, setFavIDs] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchData() {
@@ -91,6 +89,23 @@ function App() {
     }
   }, [search, professor, subject, institute, contentType]);
 
+  useEffect(() => {
+    const favIDs = JSON.parse(localStorage.getItem("nptel-favorites") || "[]");
+    setFavIDs(favIDs);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("nptel-favorites", JSON.stringify(favIDs));
+  }, [favIDs]);
+
+  const toggleFav = (id: string) => {
+    if (favIDs.includes(id)) {
+      setFavIDs(favIDs.filter((i) => i !== id));
+    } else {
+      setFavIDs([...favIDs, id]);
+    }
+  };
+
   const institutes = Array.from(
     new Set(courses.map((c) => c.institute))
   ).filter((i) => i);
@@ -107,8 +122,38 @@ function App() {
     <>
       <Header />
       <Container maxWidth="lg" sx={{ marginTop: "20px" }}>
+        {!loading && (
+          <>
+            <Typography variant="h3" sx={{ marginBottom: "20px" }}>
+              Favorites
+            </Typography>
+            <Box
+              display={"grid"}
+              gridTemplateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
+              rowGap={2}
+              columnGap={2}
+              sx={{ marginBottom: 2 }}
+            >
+              {courses
+                .filter((c) => favIDs.includes(c.id))
+                .map((course) => (
+                  <CourseCard
+                    course={course}
+                    isFavourite={true}
+                    toggleFav={() => toggleFav(course.id)}
+                    key={course.id}
+                  />
+                ))}
+
+              {favIDs.length === 0 && (
+                <Typography sx={{ mb: 2 }}>No courses starred.</Typography>
+              )}
+            </Box>
+          </>
+        )}
+
         <Typography variant="h3" sx={{ marginBottom: "20px" }}>
-          Courses
+          All Courses
         </Typography>
         {loading && <CircularProgress />}
 
@@ -205,7 +250,7 @@ function App() {
 
         <Box
           display={"grid"}
-          gridTemplateColumns={"repeat(auto-fit, minmax(300px, 1fr))"}
+          gridTemplateColumns={"repeat(auto-fill, minmax(300px, 1fr))"}
           rowGap={2}
           columnGap={2}
         >
@@ -213,37 +258,30 @@ function App() {
             filteredCourses
               .slice((page - 1) * coursePerPage, page * coursePerPage)
               .map((course: Course) => (
-                <Card key={course.id}>
-                  <CardActionArea
-                    LinkComponent={(props) => (
-                      <Link to={`/course/${course.id}`} {...props} />
-                    )}
-                    href={`/course/${course.id}`}
-                    sx={{ height: "100%" }}
-                  >
-                    <CardContent>
-                      <Typography
-                        sx={{ height: "100%" }}
-                        variant="h5"
-                        component="div"
-                      >
-                        {course.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {course.subject}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {course.institute} ({course.contentType})
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
+                <CourseCard
+                  course={course}
+                  isFavourite={favIDs.includes(course.id)}
+                  toggleFav={() => toggleFav(course.id)}
+                  key={course.id}
+                />
               ))}
 
           {filteredCourses.length === 0 && !loading && (
             <Typography>No courses found</Typography>
           )}
         </Box>
+
+        {!loading && (
+          <Box width="100%" display="flex" justifyContent="center" my={1}>
+            <Pagination
+              count={Math.ceil(filteredCourses.length / coursePerPage)}
+              page={page}
+              onChange={(_e, value) => setPage(value)}
+              shape="rounded"
+              size="large"
+            />
+          </Box>
+        )}
       </Container>
     </>
   );
