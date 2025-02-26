@@ -4,7 +4,7 @@ Alternate client to browse NPTEL Courses and resources.
 
 <details><summary>What is NPTEL?</summary>
 
-NPTEL (National Programme on Technology Enhanced Learning) is an initiative by seven Indian Institutes of Technology (IITs) and the Indian Institute of Science (IISc) to provide high-quality online courses in engineering, science, management, and humanities. It was started in 2003 by the Ministry of Education (formerly MHRD), Government of India.
+[NPTEL](https://nptel.ac.in/) (National Programme on Technology Enhanced Learning) is an initiative by seven Indian Institutes of Technology (IITs) and the Indian Institute of Science (IISc) to provide high-quality online courses in engineering, science, management, and humanities. It was started in 2003 by the Ministry of Education (formerly MHRD), Government of India.
 
 
 </details>
